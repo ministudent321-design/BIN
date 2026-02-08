@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE SYSTEM: ASCENSION</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-purple: #bc13fe;
+            --neon-red: #ff0055;
+            --neon-gold: #ffaa00;
+            --dark-bg: #020408;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(0, 242, 255, 0.2);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            background-image:
+                radial-gradient(circle at 50% 50%, #101520 0%, #020408 100%),
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 100%, 100% 4px, 3px 100%;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        #lvlOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .app-shell {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%);
+            margin-bottom: 25px;
+            box-shadow: inset 0 0 20px rgba(0, 242, 255, 0.1);
+        }
+
+        h1 {
+            font-family: 'Orbitron';
+            letter-spacing: 8px;
+            margin: 0;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .player-rank {
+            font-family: 'Orbitron';
+            color: var(--neon-red);
+            font-size: 1.8rem;
+            margin-top: 10px;
+        }
+
+        .player {
+            font-family: 'Orbitron';
+            color: var(--neon-purple);
+            font-size: 1.2rem;
+            margin-top: 10px;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .hud-card {
+            background: var(--glass);
+            border-left: 4px solid var(--neon-blue);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-label {
+            font-family: 'Orbitron';
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+            color: var(--neon-blue);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .progress-container {
+            background: #000;
+            height: 6px;
+            width: 100%;
+            border-radius: 3px;
+            margin-bottom: 12px;
+            border: 1px solid #111;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .quest-box {
+            background: rgba(10, 15, 25, 0.8);
+            border: 1px solid var(--glass-border);
+            padding: 25px;
+            position: relative;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        input[type="checkbox"] {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--neon-blue);
+            cursor: pointer;
+            margin-right: 15px;
+        }
+
+        input[type="checkbox"]:checked {
+            background: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .btn-claim {
+            width: 100%;
+            padding: 20px;
+            background: none;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-family: 'Orbitron';
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 20px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            background: none;
+            border: 1px solid #222;
+            color: #555;
+            padding: 10px;
+            font-family: 'Orbitron';
+            font-size: 0.7rem;
+        }
+
+        .nav-btn.active {
+            color: var(--neon-blue);
+            border-color: var(--neon-blue);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            background: #080a0f;
+            border: 1px solid #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #333;
+            font-family: 'Orbitron';
+        }
+
+        .day.achieved {
+            background: rgba(0, 242, 255, 0.1);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+            box-shadow: inset 0 0 5px var(--neon-blue);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .backup-tray {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            opacity: 0.3;
+            justify-content: center;
+        }
+
+        .backup-tray button {
+            background: none;
+            border: 1px solid #444;
+            color: #888;
+            font-size: 9px;
+            cursor: pointer;
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="lvlOverlay" onclick="this.style.display='none'">
+        <div
+            style="font-family: 'Orbitron'; font-size: 4rem; color: var(--neon-blue); text-shadow: 0 0 30px var(--neon-blue);">
+            RANK UP</div>
+        <div id="rankTo" style="font-family: 'Orbitron'; color: #fff; font-size: 1.5rem;">D-RANK ACHIEVED</div>
+    </div>
+
+    <div class="app-shell">
+        <div class="header">
+            <h1>THE SYSTEM</h1>
+            <div class="player-rank" id="rankDisplay">RANK: E</div>
+            <div class="player" id="rank"> PRATHIK D SOUZA </div>
+        </div>
+
+        <div class="hud-card">
+            <span class="stat-label">STR (STRENGTH)</span>
+            <div class="progress-container">
+                <div id="strBar" class="progress-bar"
+                    style="background: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue);"></div>
+            </div>
+
+            <span class="stat-label" style="color: var(--neon-purple);">STA (STAMINA)</span>
+            <div class="progress-container">
+                <div id="staBar" class="progress-bar"
+                    style="background: var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple);"></div>
+            </div>
+
+            <span class="stat-label" style="color: var(--neon-gold);">INT (FOCUS)</span>
+            <div class="progress-container">
+                <div id="intBar" class="progress-bar"
+                    style="background: var(--neon-gold); box-shadow: 0 0 10px var(--neon-gold);"></div>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-btn active" id="btnQ" onclick="switchTab('q')">MISSION</button>
+            <button class="nav-btn" id="btnC" onclick="switchTab('c')">HISTORY</button>
+        </div>
+
+        <div id="tabQuest">
+            <div class="quest-box">
+                <div id="taskList"></div>
+                <button class="btn-claim" onclick="claimRewards()">Claim Rewards</button>
+            </div>
+        </div>
+
+        <div id="tabCalendar" class="hidden">
+            <div class="quest-box">
+                <div class="grid" id="calGrid"></div>
+            </div>
+        </div>
+
+        <div class="backup-tray">
+            <button onclick="exportData()">EXPORT_BACKUP</button>
+            <button onclick="importData()">IMPORT_SYSTEM</button>
+        </div>
+    </div>
+
+    <script>
+        const audio = new (window.AudioContext || window.webkitAudioContext)();
+        function playSfx(freq, type, dur) {
+            const o = audio.createOscillator(); const g = audio.createGain();
+            o.type = type; o.connect(g); g.connect(audio.destination);
+            o.frequency.setValueAtTime(freq, audio.currentTime);
+            g.gain.setValueAtTime(0.05, audio.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + dur);
+            o.start(); o.stop(audio.currentTime + dur);
+        }
+
+        let state = JSON.parse(localStorage.getItem('monarch_final')) || { day: 1, history: [], str: 20, sta: 10, int: 10 };
+
+        function getTasks(d) {
+            let lvl = Math.floor((d - 1) / 15);
+            return [
+                `${2 + lvl}KM RUN`,
+                `${30 + (lvl * 10)} PUSH-UPS`,
+                `${30 + (lvl * 15)} SQUATS`,
+                `${30 + (lvl * 15)} CRUNCHES`,
+                `${3 + (lvl * 2)} PULL-UPS`,
+                `3 HR MBA FOCUS`
+            ];
+        }
+
+        function switchTab(t) {
+            playSfx(800, 'sine', 0.1);
+            document.getElementById('tabQuest').classList.toggle('hidden', t !== 'q');
+            document.getElementById('tabCalendar').classList.toggle('hidden', t !== 'c');
+            document.getElementById('btnQ').classList.toggle('active', t === 'q');
+            document.getElementById('btnC').classList.toggle('active', t === 'c');
+        }
+
+        function sync() {
+            const ranks = ["E", "D", "C", "B", "A", "S"];
+            let idx = Math.min(Math.floor((state.day - 1) / 15), 5);
+            document.getElementById('rankDisplay').innerText = `RANK: ${ranks[idx]}`;
+            document.getElementById('strBar').style.width = Math.min(state.str, 100) + "%";
+            document.getElementById('staBar').style.width = Math.min(state.sta, 100) + "%";
+            document.getElementById('intBar').style.width = Math.min(state.int, 100) + "%";
+
+            document.getElementById('taskList').innerHTML = getTasks(state.day).map(t => `
+                <div class="task-item">
+                    <input type="checkbox" class="t-check" onclick="playSfx(1000, 'sine', 0.05)">
+                    <span style="letter-spacing:1px; font-weight:bold">${t}</span>
+                </div>
+            `).join('');
+
+            let html = "";
+            for (let i = 1; i <= 75; i++) {
+                html += `<div class="day ${state.history.includes(i) ? 'achieved' : ''}">${i}</div>`;
+            }
+            document.getElementById('calGrid').innerHTML = html;
+        }
+
+        function claimRewards() {
+            if ([...document.querySelectorAll('.t-check')].every(c => c.checked)) {
+                if (state.history.includes(state.day)) return;
+                state.history.push(state.day);
+                state.str += 2; state.sta += 3; state.int += 5;
+                if (state.day % 15 === 0) {
+                    document.getElementById('lvlOverlay').style.display = 'flex';
+                    playSfx(440, 'square', 0.5);
+                }
+                state.day++;
+                localStorage.setItem('monarch_final', JSON.stringify(state));
+                sync();
+            } else {
+                playSfx(100, 'sawtooth', 0.3);
+            }
+        }
+
+        function exportData() {
+            const data = JSON.stringify(state);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'monarch_backup.json';
+            a.click();
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = event => {
+                    state = JSON.parse(event.target.result);
+                    localStorage.setItem('monarch_final', JSON.stringify(state));
+                    sync();
+                    alert("SYSTEM RESTORED");
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        sync();
+    </script>
+</body>
+
+</html>
